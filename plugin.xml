@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+    <name>
+        <lang name="default">LDAP Plugin</lang>
+    </name>
+    <author>
+        <lang name="default">kurosava</lang>
+    </author>
+    <homepage>http://livestreet.ru/profile/kurosava/</homepage>
+    <version>0.0.1</version>
+    <requires>
+        <livestreet>1.0.2</livestreet>
+    </requires>
+    <description>
+        <lang name="default">LDAP Plugin for Livestreet</lang>
+        <lang name="russian">Модуль интеграции с каталогами LDAP</lang>
+    </description>
+    <delegate>
+        <module></module>
+        <action></action>
+        <template></template>
+        <entity></entity>
+    </delegate>
+</plugin>
