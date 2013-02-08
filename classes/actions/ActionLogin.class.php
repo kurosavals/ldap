@@ -94,9 +94,6 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
             }
         }
 
-        $this->Message_AddErrorSingle($this->Lang_Get('user_login_bad'));
-        return;
-
         /**
          * Удаляем все поля с этим типом
          */
