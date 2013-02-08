@@ -86,16 +86,25 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
         $aType=array('contact','social');
         $aFields = $this->User_getUserFields($aType);
 
+        $aProf = Config::Get('plugin.ldap.profile');
+        $aUserFields = array();
+        foreach($aProf as $key => $value){
+            if($aFieldId=$this->User_userFieldExistsByName($key) and isset($aFieldId)){
+                $aUserFields[$aFieldId[0]['id']]=$value;
+            }
+        }
+
+        $this->Message_AddErrorSingle($this->Lang_Get('user_login_bad'));
+        return;
+
         /**
          * Удаляем все поля с этим типом
          */
         $this->User_DeleteUserFieldValues($oUser->getId(),$aType);
 
-        $aProf = Config::Get('plugin.ldap.profile');
-        $aFieldsContactType=array_keys($aProf);
-        $aFieldsContactValue=array_values($aProf);
+        $aFieldsContactType=array_keys($aUserFields);
+        $aFieldsContactValue=array_values($aUserFields);
         if (is_array($aFieldsContactType)) {
-            PluginFirephp::GetLog('Test');
             foreach($aFieldsContactType as $k=>$v) {
                 $v=(string)$v;
                 if (isset($aFields[$v]) and isset($aFieldsContactValue[$k]) and is_string($aFieldsContactValue[$k]) and isset($aLdapUser[0][$aFieldsContactValue[$k]][0])) {
