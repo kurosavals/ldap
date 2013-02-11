@@ -30,16 +30,27 @@ $config['security']['admin_groups'] = array("Администраторы дом
 
 /*
  * Настройки для профиля (пользовательские поля)
- * В массиве ключ является имененем пользовательского поля, а значение
+ * Настройки для профиля (пользовательские поля)
+ * basic - базовые настройки
+ * userfield - пользовательские поля.
+ *
+ * Используйте с осторожностью
+ *
+ * В массиве ключ является именем свойства объекта, или именем поля, а значение
  * является аттрибутом пользователя LDAP.
  * работает только со строковыми параметрами.
  */
 
-$config['profile'] = array(
-    'phone'=> 'mobile',
-    'phone2'=>'telephonenumber'
+$config['profile']['basic'] = array(
+    'setLogin' => 'samaccountname',
+    'setMail' => 'mail',
+    'setProfileName' => 'displayname',
 );
 
+$config['profile']['userfield'] = array(
+    'phone'=> 'mobile',
+    'skype' => 'telephoneNumber',
+);
 
 return $config;
 

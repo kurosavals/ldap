@@ -48,26 +48,18 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
         $aLdapUser = $ad->user()->info($sUserLogin, array('*'));
 
         $sNewPassword = md5(func_generator(7));
-        if ($oUser = $this->User_GetUserByLogin(getRequest('login'))) {
-            $oUser->setPassword($sNewPassword);
-            //$oUser->setIpRegister(func_getIp());
-            $oUser->setLogin($aLdapUser[0]['samaccountname'][0]);
-            $oUser->setProfileName($aLdapUser[0]['name'][0]);
-            $oUser->setMail($aLdapUser[0]['mail'][0]);
-
-            $this->User_Update($oUser);
-        } else {
+        if (!$oUser = $this->User_GetUserByLogin(getRequest('login'))) {
             $oUser = Engine::GetEntity('ModuleUser_EntityUser');
             $oUser->setPassword($sNewPassword);
             $oUser->setIpRegister(func_getIp());
             $oUser->setLogin($aLdapUser[0]['samaccountname'][0]);
-            $oUser->setProfileName($aLdapUser[0]['name'][0]);
             $oUser->setMail($aLdapUser[0]['mail'][0]);
             $oUser->setDateRegister(date("Y-m-d H:i:s"));
             $oUser->setActivate(1);
             $this->User_Add($oUser);
-
         }
+
+
         $bAdmin = false;
         foreach (Config::Get('plugin.ldap.security.admin_groups') as $sGroup) {
             if ($ad->user()->inGroup($sUserLogin, $sGroup)) {
@@ -83,37 +75,42 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
             $this->PluginLdap_Ldap_delAdmin($oUser->getId());
         }
 
-        $aType=array('contact','social');
+        $aType = array('contact', 'social');
         $aFields = $this->User_getUserFields($aType);
 
-        $aProf = Config::Get('plugin.ldap.profile');
+        $aProf = Config::Get('plugin.ldap.profile.userfield');
         $aUserFields = array();
-        foreach($aProf as $key => $value){
-            if($aFieldId=$this->User_userFieldExistsByName($key) and isset($aFieldId)){
-                $aUserFields[$aFieldId[0]['id']]=$value;
+        foreach ($aProf as $key => $value) {
+            if ($aFieldId = $this->User_userFieldExistsByName($key) and isset($aFieldId)) {
+                $aUserFields[$aFieldId[0]['id']] = $value;
             }
         }
 
         /**
          * Удаляем все поля с этим типом
          */
-        $this->User_DeleteUserFieldValues($oUser->getId(),$aType);
+        $this->User_DeleteUserFieldValues($oUser->getId(), $aType);
 
-        $aFieldsContactType=array_keys($aUserFields);
-        $aFieldsContactValue=array_values($aUserFields);
+        $aFieldsContactType = array_keys($aUserFields);
+        $aFieldsContactValue = array_values($aUserFields);
         if (is_array($aFieldsContactType)) {
-            foreach($aFieldsContactType as $k=>$v) {
-                $v=(string)$v;
+            foreach ($aFieldsContactType as $k => $v) {
+                $v = (string)$v;
                 if (isset($aFields[$v]) and isset($aFieldsContactValue[$k]) and is_string($aFieldsContactValue[$k]) and isset($aLdapUser[0][$aFieldsContactValue[$k]][0])) {
-                    $this->User_setUserFieldsValues($oUser->getId(), array($v=>$aLdapUser[0][$aFieldsContactValue[$k]][0]), Config::Get('module.user.userfield_max_identical'));
+                    $this->User_setUserFieldsValues($oUser->getId(), array($v => $aLdapUser[0][$aFieldsContactValue[$k]][0]), Config::Get('module.user.userfield_max_identical'));
                 }
             }
         }
 
         $bRemember = getRequest('remember', false) ? true : false;
+
+        $oUserNew = $this->updateBasicProfile($oUser, $aLdapUser);
+        $this->User_Update($oUserNew);
+
         /**
          * Авторизуем
          */
+
         $this->User_Authorization($oUser, $bRemember);
         /**
          * Определяем редирект
@@ -126,6 +123,14 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
         return;
 
 
+    }
+
+    protected function updateBasicProfile($oUser, $aLdapUser) {
+        $aUpdate = Config::Get('plugin.ldap.profile.basic');
+        foreach ($aUpdate as $key => $value) {
+            $oUser->$key($aLdapUser[0][$value][0]);
+        }
+        return $oUser;
     }
 }
 
