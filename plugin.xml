@@ -7,7 +7,7 @@
         <lang name="default">kurosava</lang>
     </author>
     <homepage>http://livestreet.ru/profile/kurosava/</homepage>
-    <version>0.0.1</version>
+    <version>0.1.0</version>
     <requires>
         <livestreet>1.0.2</livestreet>
     </requires>
