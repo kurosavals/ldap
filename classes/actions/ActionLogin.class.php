@@ -47,12 +47,17 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
 
         $aLdapUser = $ad->user()->info($sUserLogin, array('*'));
 
-        $sNewPassword = md5(func_generator(7));
+	    if (($aLdapUser[0]['useraccountcontrol'][0] & 2) == 0){
+		    $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_user_disabled'));
+		    return;
+	    }
+
+	    $sNewPassword = md5(func_generator(7));
         if (!$oUser = $this->User_GetUserByLogin(getRequest('login'))) {
             $oUser = Engine::GetEntity('ModuleUser_EntityUser');
             if(!$this->updateBasicProfile($oUser,$aLdapUser)){
-                $this->Message_AddErrorSingle($this->Lang_Get('register_user_ad_bad'));
-                return;
+	            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
+	            return;
             }
 
             $oUser->setPassword($sNewPassword);
@@ -109,11 +114,11 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
 
         $bRemember = getRequest('remember', false) ? true : false;
 
-        $oUserNew = $this->updateBasicProfile($oUser, $aLdapUser);
-        if(!$this->updateBasicProfile($oUser,$aLdapUser)){
-            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
-            return;
+        if(!($oUserNew = $this->updateBasicProfile($oUser, $aLdapUser))){
+	        $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
+	        return;
         }
+
         $this->User_Update($oUserNew);
 
         /**
