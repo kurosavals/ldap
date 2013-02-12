@@ -47,7 +47,8 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
 
         $aLdapUser = $ad->user()->info($sUserLogin, array('*'));
 
-	    if (($aLdapUser[0]['useraccountcontrol'][0] & 2) == 0){
+
+	    if (!($aLdapUser[0]['useraccountcontrol'][0] & 2) == 0 ){
 		    $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_user_disabled'));
 		    return;
 	    }
