@@ -21,7 +21,7 @@ class PluginLdap extends Plugin {
      * Plugin Ldap activation
      */
     public function Activate() {
-        $this->ExportSQL(dirname(__FILE__) . '/db.sql');
+        //$this->ExportSQL(dirname(__FILE__) . '/db.sql');
         return true;
     }
 

@@ -50,6 +50,11 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
         $sNewPassword = md5(func_generator(7));
         if (!$oUser = $this->User_GetUserByLogin(getRequest('login'))) {
             $oUser = Engine::GetEntity('ModuleUser_EntityUser');
+            if(!$this->updateBasicProfile($oUser,$aLdapUser)){
+                $this->Message_AddErrorSingle($this->Lang_Get('register_user_ad_bad'));
+                return;
+            }
+
             $oUser->setPassword($sNewPassword);
             $oUser->setIpRegister(func_getIp());
             $oUser->setLogin($aLdapUser[0]['samaccountname'][0]);
@@ -105,6 +110,10 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
         $bRemember = getRequest('remember', false) ? true : false;
 
         $oUserNew = $this->updateBasicProfile($oUser, $aLdapUser);
+        if(!$this->updateBasicProfile($oUser,$aLdapUser)){
+            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
+            return;
+        }
         $this->User_Update($oUserNew);
 
         /**
@@ -128,6 +137,9 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
     protected function updateBasicProfile($oUser, $aLdapUser) {
         $aUpdate = Config::Get('plugin.ldap.profile.basic');
         foreach ($aUpdate as $key => $value) {
+            if(!array_key_exists($value, $aLdapUser[0])){
+                return false;
+            }
             $oUser->$key($aLdapUser[0][$value][0]);
         }
         return $oUser;
