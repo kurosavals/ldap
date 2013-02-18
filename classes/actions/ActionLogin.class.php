@@ -179,14 +179,23 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
 
 		if ($oUser->getProfileCity()) {
 			$oGeoObject = $this->PluginLdap_Ldap_GetGeoName('city', $oUser->getProfileCity());
-		} elseif ($oUser->getProfileRegion()) {
-			$oGeoObject = $this->PluginLdap_Ldap_GetGeoName('region', $oUser->getProfileRegion());
-		} elseif ($oUser->getProfileCountry()) {
-			$oGeoObject = PluginLdap_Ldap_GetGeoName('country', $oUser->getProfileCountry());
-		} else {
-			$oGeoObject = null;
+			if ($oGeoObject) {
+				return $oGeoObject;
+			}
 		}
-		return $oGeoObject;
+		if ($oUser->getProfileRegion()) {
+			$oGeoObject = $this->PluginLdap_Ldap_GetGeoName('region', $oUser->getProfileRegion());
+			if ($oGeoObject) {
+				return $oGeoObject;
+			}
+		}
+		if ($oUser->getProfileCountry()) {
+			$oGeoObject = PluginLdap_Ldap_GetGeoName('country', $oUser->getProfileCountry());
+			if ($oGeoObject) {
+				return $oGeoObject;
+			}
+		}
+		return null;
 	}
 }
 

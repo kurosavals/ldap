@@ -46,7 +46,7 @@ class PluginLdap_ModuleLdap extends Module {
 	}
 
 	public function GetRegionByName($sName) {
-		$aRes=$this->GeoGetRegions(array('name_ru'=>$sName),array(),1,1);
+		$aRes=$this->Geo_GetRegions(array('name_ru'=>$sName),array(),1,1);
 		if (isset($aRes['collection'][0])) {
 			return $aRes['collection'][0];
 		}
