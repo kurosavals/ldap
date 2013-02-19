@@ -1,0 +1,1 @@
+<li><a href="{router page="admin"}reloadldapprofiles/?security_ls_key={$LIVESTREET_SECURITY_KEY}">{$aLang.plugin.ldap.reimport_ldap_users}</a></li>

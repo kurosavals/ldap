@@ -177,25 +177,25 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
 
 	protected function updateGeo($oUser) {
 
-		if ($oUser->getProfileCity()) {
-			$oGeoObject = $this->PluginLdap_Ldap_GetGeoName('city', $oUser->getProfileCity());
-			if ($oGeoObject) {
-				return $oGeoObject;
-			}
-		}
-		if ($oUser->getProfileRegion()) {
-			$oGeoObject = $this->PluginLdap_Ldap_GetGeoName('region', $oUser->getProfileRegion());
-			if ($oGeoObject) {
-				return $oGeoObject;
-			}
-		}
-		if ($oUser->getProfileCountry()) {
-			$oGeoObject = PluginLdap_Ldap_GetGeoName('country', $oUser->getProfileCountry());
-			if ($oGeoObject) {
-				return $oGeoObject;
-			}
-		}
-		return null;
+        if ($oUser->getProfileCity()) {
+            if ($oGeoObject = $this->PluginLdap_Ldap_GetGeoName('city', $oUser->getProfileCity())) {
+                return $oGeoObject;
+            }
+        }
+
+        if ($oUser->getProfileRegion()) {
+            if ($oGeoObject = $this->PluginLdap_Ldap_GetGeoName('region', $oUser->getProfileRegion())) {
+                return $oGeoObject;
+            }
+        }
+
+        if ($oUser->getProfileCountry()) {
+            if ($oGeoObject = PluginLdap_Ldap_GetGeoName('country', $oUser->getProfileCountry())) {
+                return $oGeoObject;
+            }
+        }
+
+        return null;
 	}
 }
 
