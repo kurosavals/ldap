@@ -14,5 +14,8 @@ return array(
         'users_import' => 'Импорт пользователей',
         'synchronize' => 'Синхронизировать',
         'user_import_ok' => 'Пользователь успешно импортирован',
+
+		'ldap_username' => 'Пользователь',
+		'ldap_action' => 'Действие',
 );
 ?>
