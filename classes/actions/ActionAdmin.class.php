@@ -1,13 +1,186 @@
 <?php
 
-class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin {
+class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
+{
 
-    protected function RegisterEvent() {
+    protected function RegisterEvent()
+    {
         parent::RegisterEvent();
-        $this->AddEvent('reloadldapprofiles', 'EventReloadLdapProfiles');
+        $this->AddEventPreg('/^users$/i', '/^(page([1-9]\d{0,5}))?$/i', array('EventUsers', 'users'));
+        $this->AddEvent('users', array('EventUsers', 'users'));
+        // $this->AddEvent('reloadldapprofiles', 'EventReloadLdapProfiles');
+        $this->AddEvent('ajaxldapimport', 'AjaxLdapImport');
     }
 
-    protected function EventReloadLdapProfiles() {
+    protected function AjaxLdapImport()
+    {
+        $this->Viewer_SetResponseAjax('json');
+        $bAdmin = false;
+        $oGeoObject = null;
+        /*
+         * Пользователь - администратор?
+         */
+
+        if (!$this->oUserCurrent or !$this->oUserCurrent->isAdministrator()) {
+            $this->Message_AddErrorSingle($this->Lang_Get('not_access'), $this->Lang_Get('error'));
+            return;
+        }
+
+        require_once Plugin::GetPath(__CLASS__) . '/lib/external/adldap/adLDAP.php';
+
+        if (!($ad = new adLDAP(array('base_dn' => Config::Get('plugin.ldap.ad.base_dn'), 'account_suffix' => Config::Get('plugin.ldap.ad.account_suffix'), 'domain_controllers' => Config::Get('plugin.ldap.ad.domain_controllers'), 'admin_username' => Config::Get('plugin.ldap.ad.admin_username'), 'admin_password' => Config::Get('plugin.ldap.ad.admin_password'), 'use_ssl' => Config::Get('plugin.ldap.ad.use_ssl'), 'use_tls' => Config::Get('plugin.ldap.ad.use_tls'), 'ad_port' => Config::Get('plugin.ldap.ad.use_ssl'))))) {
+            $this->Message_AddError($this->Lang_Get('system_error'));
+        }
+
+        $ad->close();
+        $ad->connect();
+
+        $sUserLogin = getRequestStr('userLogin', null, 'post');
+
+        $aLdapUser = $ad->user()->info($sUserLogin, array('*'));
+
+
+        $sNewPassword = md5(func_generator(7));
+        if (!$oUser = $this->User_GetUserByLogin(getRequest('login'))) {
+            $oUser = Engine::GetEntity('ModuleUser_EntityUser');
+            if (!$this->updateBasicProfile($oUser, $aLdapUser)) {
+                $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
+                return;
+            }
+
+            $oUser->setPassword($sNewPassword);
+            $oUser->setIpRegister(func_getIp());
+            $oUser->setLogin($aLdapUser[0]['samaccountname'][0]);
+            $oUser->setMail($aLdapUser[0]['mail'][0]);
+            $oUser->setDateRegister(date("Y-m-d H:i:s"));
+            $oUser->setActivate(1);
+            $this->User_Add($oUser);
+        }
+
+
+        $bAdmin = false;
+        foreach (Config::Get('plugin.ldap.security.admin_groups') as $sGroup) {
+            if ($ad->user()->inGroup($sUserLogin, $sGroup)) {
+                $bAdmin = true;
+            }
+
+        }
+        if ($bAdmin) {
+            if (!$oUser->isAdministrator()) {
+                $this->PluginLdap_Ldap_setAdmin($oUser->getId());
+            }
+        } else {
+            $this->PluginLdap_Ldap_delAdmin($oUser->getId());
+        }
+
+        $aType = array('contact', 'social');
+        $aFields = $this->User_getUserFields($aType);
+
+        $aProf = Config::Get('plugin.ldap.profile.userfield');
+        $aUserFields = array();
+        foreach ($aProf as $key => $value) {
+            if ($aFieldId = $this->User_userFieldExistsByName($key) and isset($aFieldId)) {
+                $aUserFields[$aFieldId[0]['id']] = $value;
+            }
+        }
+
+        /**
+         * Удаляем все поля с этим типом
+         */
+        $this->User_DeleteUserFieldValues($oUser->getId(), $aType);
+
+        $aFieldsContactType = array_keys($aUserFields);
+        $aFieldsContactValue = array_values($aUserFields);
+        if (is_array($aFieldsContactType)) {
+            foreach ($aFieldsContactType as $k => $v) {
+                $v = (string)$v;
+                if (isset($aFields[$v]) and isset($aFieldsContactValue[$k]) and is_string($aFieldsContactValue[$k]) and isset($aLdapUser[0][$aFieldsContactValue[$k]][0])) {
+                    $this->User_setUserFieldsValues($oUser->getId(), array($v => $aLdapUser[0][$aFieldsContactValue[$k]][0]), Config::Get('module.user.userfield_max_identical'));
+                }
+            }
+        }
+
+        if (!($oUserNew = $this->updateBasicProfile($oUser, $aLdapUser))) {
+            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
+            return;
+        }
+        if ($oUserNew->getProfileCity() or $oUserNew->getProfileRegion() or $oUserNew->getProfileCountry()) {
+            $oGeoObject = $this->updateGeo($oUserNew);
+        }
+
+
+        if ($oGeoObject) {
+            $this->Geo_CreateTarget($oGeoObject, 'user', $oUserNew->getId());
+
+            if ($oCountry = $oGeoObject->getCountry()) {
+                $oUserNew->setProfileCountry($oCountry->getName());
+            } else {
+                $oUserNew->setProfileCountry(null);
+            }
+            if ($oRegion = $oGeoObject->getRegion()) {
+                $oUserNew->setProfileRegion($oRegion->getName());
+            } else {
+                $oUserNew->setProfileRegion(null);
+            }
+            if ($oCity = $oGeoObject->getCity()) {
+                $oUserNew->setProfileCity($oCity->getName());
+            } else {
+                $oUserNew->setProfileCity(null);
+            }
+        } else {
+            $this->Geo_DeleteTargetsByTarget('user', $oUserNew->getId());
+            $oUserNew->setProfileCountry(null);
+            $oUserNew->setProfileRegion(null);
+            $oUserNew->setProfileCity(null);
+        }
+        $this->User_Update($oUserNew);
+
+        $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ldap.user_import_ok'), $this->Lang_Get('attention'));
+        //$this->Message_AddNoticeSingle('Действие записано в лог',$this->Lang_Get('attention'));
+        $this->Viewer_AssignAjax('bState', true);
+
+
+    }
+
+    protected function EventUsers()
+    {
+
+        $iPage = $this->GetParamEventMatch(0, 2) ? $this->GetParamEventMatch(0, 2) : 1;
+        require_once Plugin::GetPath(__CLASS__) . '/lib/external/adldap/adLDAP.php';
+        if (!($ad = new adLDAP(array('base_dn' => Config::Get('plugin.ldap.ad.base_dn'), 'account_suffix' => Config::Get('plugin.ldap.ad.account_suffix'), 'domain_controllers' => Config::Get('plugin.ldap.ad.domain_controllers'), 'admin_username' => Config::Get('plugin.ldap.ad.admin_username'), 'admin_password' => Config::Get('plugin.ldap.ad.admin_password'), 'use_ssl' => Config::Get('plugin.ldap.ad.use_ssl'), 'use_tls' => Config::Get('plugin.ldap.ad.use_tls'), 'ad_port' => Config::Get('plugin.ldap.ad.use_ssl'))))) {
+            $this->Message_AddError($this->Lang_Get('system_error'));
+        }
+
+        $ad->close();
+        $ad->connect();
+
+        $aldapUsers = $ad->user()->all();
+
+        $pages = array_chunk($aldapUsers, Config::Get('module.blog.users_per_page'));
+        $aUsers = array();
+        $data = array();
+        foreach ($pages[$iPage - 1] as $sUser) {
+            $data['name'] = $sUser;
+            if ($oUser = $this->User_GetUserByLogin($sUser)) {
+                $data['is_ad'] = true;
+            } else {
+                $data['is_ad'] = false;
+            }
+            $aUsers[] = $data;
+        }
+        $this->Viewer_Assign('aUsers', $aUsers);
+        /*
+         * Пагинация пользователей
+         */
+        //PluginFirephp::GetLog(count($pages));
+        $aPaging = $this->Viewer_MakePaging(count($pages), $iPage, 1, Config::Get('pagination.pages.count'), Router::GetPath('admin') . "users/");
+        $this->Viewer_Assign('aPaging', $aPaging);
+
+    }
+
+
+    protected function EventReloadLdapProfiles()
+    {
         $bAdmin = false;
         $oGeoObject = null;
         $this->Security_ValidateSendForm();
@@ -85,8 +258,8 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin {
                 }
             }
             if (!($oUserNew = $this->updateBasicProfile($oUser, $aLdapUser))) {
-               // $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
-               // return;
+                // $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
+                // return;
                 continue;
             }
             if ($oUserNew->getProfileCity() or $oUserNew->getProfileRegion() or $oUserNew->getProfileCountry()) {
@@ -128,7 +301,8 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin {
 
     }
 
-    protected function updateBasicProfile($oUser, $aLdapUser) {
+    protected function updateBasicProfile($oUser, $aLdapUser)
+    {
         $aUpdate = Config::Get('plugin.ldap.profile.basic');
         foreach ($aUpdate as $key => $value) {
             if (!array_key_exists($value, $aLdapUser[0])) {
@@ -139,7 +313,8 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin {
         return $oUser;
     }
 
-    protected function updateGeo($oUser) {
+    protected function updateGeo($oUser)
+    {
 
         if ($oUser->getProfileCity()) {
             if ($oGeoObject = $this->PluginLdap_Ldap_GetGeoName('city', $oUser->getProfileCity())) {
