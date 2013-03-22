@@ -213,14 +213,16 @@ class adLDAPUsers {
     * @param bool $isGUID Is the username passed a GUID or a samAccountName
     * @return array
     */
-    public function info($username, $fields = NULL, $isGUID = false)
+    public function info($username, $fields = NULL, $isGUID = false, $isMail = false)
     {
         if ($username === NULL) { return false; }
         if (!$this->adldap->getLdapBind()) { return false; }
-
         if ($isGUID === true) {
             $username = $this->adldap->utilities()->strGuidToHex($username);
             $filter = "objectguid=" . $username;
+        }
+        elseif($isMail === true){
+            $filter = "mail=" . $username;
         }
         else if (strstr($username, "@")) {
              $filter = "userPrincipalName=" . $username;
@@ -228,7 +230,10 @@ class adLDAPUsers {
         else {
              $filter = "samaccountname=" . $username;
         }
-        $filter = "(&(objectCategory=person)({$filter}))";
+        if ($isMail === true){
+            $filter = "(&(objectCategory=person)({$filter}))";
+        }
+
         if ($fields === NULL) { 
             $fields = array("samaccountname","mail","memberof","department","displayname","telephonenumber","primarygroupid","objectsid"); 
         }

@@ -11,11 +11,14 @@ class PluginLdap extends Plugin {
 
     protected $aInherits = array(
         'action' => array('ActionLogin','ActionAdmin','ActionRegistration'),
+        'entity' => array('ModuleUser_EntityUser'),
 
     );
+    /*
     protected $aDelegates = array(
         'template' => array('window_login.tpl')
     );
+    */
 
     /**
      * Plugin Ldap activation
