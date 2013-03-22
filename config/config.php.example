@@ -4,6 +4,8 @@
  *  Настройки подключения к Active Directory
  */
 
+ Config::Set('db.table.user_ad', '___db.table.prefix___user_ad');
+
 //список доменных контроллеров
 $config['ad']['domain_controllers'] = array(); //array("dc1.example.com","dc2.example.com")
 

@@ -12,8 +12,10 @@
 <table class="table table-blogs" cellspacing="0">
     <thead>
     <tr>
+        {* // пока отключил. Функция не написана
         <th class="cell-checkbox" width="15px"><input type="checkbox" name=""
                                          onclick="ls.tools.checkAll('form_users', this, true);"/></th>
+*}
         <th>{$aLang.plugin.ldap.ldap_username}</th>
         <th>{$aLang.plugin.ldap.ldap_action}</th>
     </tr>
@@ -22,7 +24,9 @@
     {if $aUsers}
         {foreach from=$aUsers item=aUser}
             <tr>
+                {*
                 <td class="cell-checkbox"><input type="checkbox" name="user_{$aUser.name}" class="form_users" /></td>
+*}
                 <td class="cell-name">
                         <span class="user-avatar">
 							{$aUser.name}
@@ -36,6 +40,9 @@
     {/if}
     </tbody>
 </table>
-
+{*
+<a class="button">Синхронизировать выделенных</a>
+<a class="button">Синхронизировать все</a>
+*}
 {include file='paging.tpl' aPaging="$aPaging"}
 {include file='footer.tpl'}

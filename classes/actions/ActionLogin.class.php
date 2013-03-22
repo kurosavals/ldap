@@ -110,6 +110,8 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
 
 		$bRemember = getRequest('remember', false) ? true : false;
 
+        $oGeoObject = false;
+
 		if (!($oUserNew = $this->updateBasicProfile($oUser, $aLdapUser))) {
 			$this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.ldap_register_ad_error'));
 			return;
@@ -143,7 +145,10 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
 			$oUserNew->setProfileRegion(null);
 			$oUserNew->setProfileCity(null);
 		}
-		$this->User_Update($oUserNew);
+        $this->User_Update($oUserNew);
+        if (!$this->PluginLdap_Ldap_GetAdUserById($oUser->getId())){
+            $this->PluginLdap_Ldap_AddAdUser($oUser->getId());
+        }
 
 
 		/**

@@ -61,5 +61,37 @@ class PluginLdap_ModuleLdap extends Module {
 		return null;
 	}
 
+    /*
+     * классы, связанные с LDAP/AD
+     */
+
+    public function GetAdUserById($iUserId) {
+        if (false === ($data = $this->Cache_Get("ad_user_{$iUserId}"))) {
+            $data = $this->oMapper->GetAdUserById($iUserId);
+            $this->Cache_Set($data, "ad_user_{$iUserId}", array("ad_user_{$iUserId}"), 60*60*24*5);
+        }
+        return $data;
+    }
+
+    public function DelAdUser($iUserId) {
+        if ($this->oMapper->delAdUser($iUserId)) {
+            //чистим зависимые кеши
+            $this->Cache_Clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG,array("ad_user_{$iUserId}"));
+            return true;
+        }
+        return false;
+    }
+
+    public function AddAdUser($iUserId) {
+        if ($sId=$this->oMapper->addAdUser($iUserId)) {
+            //чистим зависимые кеши
+            $this->Cache_Clean(Zend_Cache::CLEANING_MODE_MATCHING_TAG,array("ad_user_{$iUserId}"));
+            return true;
+        }
+        return false;
+    }
+
+
+
 }
 
