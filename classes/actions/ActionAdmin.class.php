@@ -26,14 +26,7 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
             return;
         }
 
-        require_once Plugin::GetPath(__CLASS__) . '/lib/external/adldap/adLDAP.php';
-
-        if (!($ad = new adLDAP(array('base_dn' => Config::Get('plugin.ldap.ad.base_dn'), 'account_suffix' => Config::Get('plugin.ldap.ad.account_suffix'), 'domain_controllers' => Config::Get('plugin.ldap.ad.domain_controllers'), 'admin_username' => Config::Get('plugin.ldap.ad.admin_username'), 'admin_password' => Config::Get('plugin.ldap.ad.admin_password'), 'use_ssl' => Config::Get('plugin.ldap.ad.use_ssl'), 'use_tls' => Config::Get('plugin.ldap.ad.use_tls'), 'ad_port' => Config::Get('plugin.ldap.ad.use_ssl'))))) {
-            $this->Message_AddError($this->Lang_Get('system_error'));
-        }
-
-        $ad->close();
-        $ad->connect();
+        $ad = $this->PluginLdap_Ldap_InitializeConnect();
 
         $sUserLogin = getRequestStr('userLogin', null, 'post');
 
@@ -146,13 +139,8 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
     {
 
         $iPage = $this->GetParamEventMatch(0, 2) ? $this->GetParamEventMatch(0, 2) : 1;
-        require_once Plugin::GetPath(__CLASS__) . '/lib/external/adldap/adLDAP.php';
-        if (!($ad = new adLDAP(array('base_dn' => Config::Get('plugin.ldap.ad.base_dn'), 'account_suffix' => Config::Get('plugin.ldap.ad.account_suffix'), 'domain_controllers' => Config::Get('plugin.ldap.ad.domain_controllers'), 'admin_username' => Config::Get('plugin.ldap.ad.admin_username'), 'admin_password' => Config::Get('plugin.ldap.ad.admin_password'), 'use_ssl' => Config::Get('plugin.ldap.ad.use_ssl'), 'use_tls' => Config::Get('plugin.ldap.ad.use_tls'), 'ad_port' => Config::Get('plugin.ldap.ad.use_ssl'))))) {
-            $this->Message_AddError($this->Lang_Get('system_error'));
-        }
 
-        $ad->close();
-        $ad->connect();
+        $ad = $this->PluginLdap_Ldap_InitializeConnect();
 
         $aldapUsers = $ad->user()->all();
 
@@ -187,14 +175,7 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
         set_time_limit(0);
         $this->SetTemplateAction('index');
 
-        require_once Plugin::GetPath(__CLASS__) . '/lib/external/adldap/adLDAP.php';
-
-        if (!($ad = new adLDAP(array('base_dn' => Config::Get('plugin.ldap.ad.base_dn'), 'account_suffix' => Config::Get('plugin.ldap.ad.account_suffix'), 'domain_controllers' => Config::Get('plugin.ldap.ad.domain_controllers'), 'admin_username' => Config::Get('plugin.ldap.ad.admin_username'), 'admin_password' => Config::Get('plugin.ldap.ad.admin_password'), 'use_ssl' => Config::Get('plugin.ldap.ad.use_ssl'), 'use_tls' => Config::Get('plugin.ldap.ad.use_tls'), 'ad_port' => Config::Get('plugin.ldap.ad.use_ssl'))))) {
-            $this->Message_AddError($this->Lang_Get('system_error'));
-        }
-
-        $ad->close();
-        $ad->connect();
+        $ad = $this->PluginLdap_Ldap_InitializeConnect();
 
         $aUsers = $ad->user()->all();
         foreach ($aUsers as $user) {
