@@ -53,7 +53,7 @@ class PluginLdap_ActionLogin extends PluginLdap_Inherit_ActionLogin {
 		 * Авторизуем
 		 */
         $bRemember = getRequest('remember', false) ? true : false;
-		$this->User_Authorization($oUser, $bRemember);
+		$this->User_Authorization($aResult['data'], $bRemember);
 		/**
 		 * Определяем редирект
 		 */
