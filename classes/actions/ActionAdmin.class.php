@@ -41,6 +41,7 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
 
     }
 
+
     protected function EventUsers()
     {
 

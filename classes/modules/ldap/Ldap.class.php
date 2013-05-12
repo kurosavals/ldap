@@ -168,7 +168,7 @@ class PluginLdap_ModuleLdap extends Module {
 
 
         $sNewPassword = md5(func_generator(7));
-        if (!$oUser = $this->User_GetUserByLogin(getRequest('login'))) {
+        if (!$oUser = $this->User_GetUserByLogin($sUserLogin)) {
             $oUser = Engine::GetEntity('ModuleUser_EntityUser');
             if (!$this->PluginLdap_Ldap_updateBasicProfile($oUser, $aLdapUser)) {
 	            $aResult['status']=0;
@@ -185,6 +185,7 @@ class PluginLdap_ModuleLdap extends Module {
                 $aResult['data']=$this->Lang_Get('plugin.ldap.ldap_register_ad_error');
                 return $aResult;
             }
+	        PluginFirephp::GetLog($oUser);
             $this->User_Add($oUser);
         }
 

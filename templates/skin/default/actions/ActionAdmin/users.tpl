@@ -33,8 +33,8 @@
 						</span>
                 </td>
                 <td class="cell-readers">
-                            {if $aUser.is_ad} <a class="btn" href="#" onclick="ls.ldap.import(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.resynchronize}"><i class="icon-repeat"></i></a>{else} <a class="btn" href="#" onclick="ls.ldap.import(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.synchronize}"><i class="icon-play-circle">{/if}
-                            <a class="btn" href="#" onclick="ls.ldap.import(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.synchronize-delay}"><i class="icon-time"></i></a>
+                            {if $aUser.is_ad} <a class="btn" href="#" onclick="ls.ldap.import(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.resynchronize}"><i class="icon-repeat"></i></a>{else} <a class="btn" href="#" onclick="ls.ldap.import(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.synchronize}"><i class="icon-play-circle"></a>{/if}
+                            <a class="btn" href="#" onclick="ls.ldap.delayimport(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.synchronize-delay}"><i class="icon-time"></i></a>
 
 
                 </td>

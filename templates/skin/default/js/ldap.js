@@ -12,7 +12,7 @@ ls.ldap = (function ($) {
                 obj = $(obj);
                 ls.msg.notice(null, result.sMsg);
                 obj.remove();
-               }
+            }
         });
     };
 
