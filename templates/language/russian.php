@@ -13,6 +13,8 @@ return array(
 
         'users_import' => 'Импорт пользователей',
         'synchronize' => 'Синхронизировать',
+		'synchronize-delay' => 'Отложенная синхронизация',
+		'resynchronize' => 'Ресинхронизировать',
         'user_import_ok' => 'Пользователь успешно импортирован',
 
 		'ldap_username' => 'Пользователь',

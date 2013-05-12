@@ -32,9 +32,12 @@
 							{$aUser.name}
 						</span>
                 </td>
-                <td class="cell-readers"> {if !$aUser.is_ad}<a class="button button-primary"
-                                                                  onclick="ls.ldap.import(this,'{$aUser.name}'); return false;">{$aLang.plugin.ldap.synchronize}</a>
-                </td>{/if}
+                <td class="cell-readers">
+                            {if $aUser.is_ad} <a class="btn" href="#" onclick="ls.ldap.import(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.resynchronize}"><i class="icon-repeat"></i></a>{else} <a class="btn" href="#" onclick="ls.ldap.import(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.synchronize}"><i class="icon-play-circle">{/if}
+                            <a class="btn" href="#" onclick="ls.ldap.import(this,'{$aUser.name}'); return false;" title="{$aLang.plugin.ldap.synchronize-delay}"><i class="icon-time"></i></a>
+
+
+                </td>
             </tr>
         {/foreach}
     {/if}
