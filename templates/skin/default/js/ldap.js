@@ -2,10 +2,24 @@ var ls = ls || {};
 
 ls.ldap = (function ($) {
 
-    this.import = function(obj,userLogin) {
-        var url = aRouter['admin']+'ajaxldapimport/';
+    this.import = function (obj, userLogin) {
+        var url = aRouter['admin'] + 'ajaxldapimport/';
         var params = {userLogin: userLogin};
-        ls.ajax(url,params,function(result) {
+        ls.ajax(url, params, function (result) {
+            if (result.bStateError) {
+                ls.msg.error(null, result.sMsg);
+            } else {
+                obj = $(obj);
+                ls.msg.notice(null, result.sMsg);
+                obj.remove();
+            }
+        });
+    };
+
+    this.delayimport = function (obj, userLogin) {
+        var url = aRouter['admin'] + 'ajaxdelayimport/';
+        var params = {userLogin: userLogin};
+        ls.ajax(url, params, function (result) {
             if (result.bStateError) {
                 ls.msg.error(null, result.sMsg);
             } else {
@@ -17,4 +31,4 @@ ls.ldap = (function ($) {
     };
 
     return this;
-}).call(ls.profiler || {},jQuery);
+}).call(ls.profiler || {}, jQuery);

@@ -5,6 +5,7 @@
  */
 
  Config::Set('db.table.user_ad', '___db.table.prefix___user_ad');
+ Config::Set('db.table.ad_cron', '___db.table.prefix___ad_cron');
 
 //список доменных контроллеров
 $config['ad']['domain_controllers'] = array(); //array("dc1.example.com","dc2.example.com")

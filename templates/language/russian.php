@@ -13,7 +13,9 @@ return array(
 
         'users_import' => 'Импорт пользователей',
         'synchronize' => 'Синхронизировать',
-		'synchronize-delay' => 'Отложенная синхронизация',
+		'synchronize_delay' => 'Отложенная синхронизация',
+        'delay_sync_is_ok' => 'Успешно добавлен',
+        'delay_user_already_add_tosync' => 'Пользователь уже добавлен в следующую синхронизацию',
 		'resynchronize' => 'Ресинхронизировать',
         'user_import_ok' => 'Пользователь успешно импортирован',
 

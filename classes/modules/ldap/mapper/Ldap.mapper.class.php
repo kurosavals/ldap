@@ -3,6 +3,33 @@
 class PluginLdap_ModuleLdap_MapperLdap extends Mapper {
 
 
+    public function  GetNextSyncUser($sUserLogin) {
+
+        $sql = "
+			SELECT user_name
+			FROM ".Config::Get('db.table.ad_cron')."
+			WHERE user_name=?
+		";
+
+        if($this->oDb->query($sql,$sUserLogin)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function DelaySyncUser($sUserLogin) {
+
+        $sql = "INSERT INTO " . Config::Get('db.table.ad_cron') . "
+			(user_name)
+			VALUES (?)
+		";
+        if ($this->oDb->query($sql, $sUserLogin)) {
+            return true;
+        }
+        return false;
+    }
+
+
     public function setAdmin($iUserId) {
 
         $sql = "INSERT INTO " . Config::Get('db.table.user_administrator') . "

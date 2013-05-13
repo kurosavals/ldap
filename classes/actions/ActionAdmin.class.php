@@ -10,6 +10,37 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
         $this->AddEvent('users', array('EventUsers', 'users'));
         // $this->AddEvent('reloadldapprofiles', 'EventReloadLdapProfiles');
         $this->AddEvent('ajaxldapimport', 'AjaxLdapImport');
+        $this->AddEvent('ajaxdelayimport', 'AjaxDelayImport');
+    }
+
+    protected function AjaxDelayImport()
+    {
+        $this->Viewer_SetResponseAjax('json');
+        /*
+         * Пользователь - администратор?
+         */
+
+        if (!$this->oUserCurrent or !$this->oUserCurrent->isAdministrator()) {
+            $this->Message_AddErrorSingle($this->Lang_Get('not_access'), $this->Lang_Get('error'));
+            return;
+        }
+
+        $sUserLogin = getRequestStr('userLogin', null, 'post');
+
+        if ($this->PluginLdap_Ldap_GetNextSyncUser($sUserLogin)) {
+            $this->Message_AddErrorSingle($this->Lang_Get('plugin.ldap.delay_user_already_add_tosync'), $this->Lang_Get('error'));
+            $this->Viewer_AssignAjax('bState', false);
+        } else {
+            if ($this->PluginLdap_Ldap_DelaySyncUser($sUserLogin)) {
+                $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ldap.delay_sync_is_ok'), $this->Lang_Get('attention'));
+                $this->Viewer_AssignAjax('bState', true);
+            } else {
+                $this->Message_AddNoticeSingle('Get Problem!', $this->Lang_Get('error'));
+                $this->Viewer_AssignAjax('bState', false);
+            }
+        }
+
+
     }
 
     protected function AjaxLdapImport()
@@ -17,6 +48,7 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
         $this->Viewer_SetResponseAjax('json');
         $bAdmin = false;
         $oGeoObject = null;
+
         /*
          * Пользователь - администратор?
          */
@@ -29,14 +61,18 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
         $ad = $this->PluginLdap_Ldap_InitializeConnect();
 
         $sUserLogin = getRequestStr('userLogin', null, 'post');
-        if(!$this->PluginLdap_Ldap_Synchronize($ad,$sUserLogin)){
+        if (!$aResult = $this->PluginLdap_Ldap_Synchronize($ad, $sUserLogin)) {
             $this->Message_AddErrorSingle($this->Lang_Get('system_error'), $this->Lang_Get('error'));
             return;
         }
 
-        $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ldap.user_import_ok'), $this->Lang_Get('attention'));
-        //$this->Message_AddNoticeSingle('Действие записано в лог',$this->Lang_Get('attention'));
-        $this->Viewer_AssignAjax('bState', true);
+        if ($aResult['status'] === 1) {
+            $this->Message_AddNoticeSingle($this->Lang_Get('plugin.ldap.user_import_ok'), $this->Lang_Get('attention'));
+            $this->Viewer_AssignAjax('bState', true);
+        } else {
+            $this->Message_AddErrorSingle($aResult['data'], $this->Lang_Get('attention'));
+            $this->Viewer_AssignAjax('bState', false);
+        }
 
 
     }

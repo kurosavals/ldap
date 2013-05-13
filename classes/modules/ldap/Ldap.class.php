@@ -185,8 +185,7 @@ class PluginLdap_ModuleLdap extends Module {
                 $aResult['data']=$this->Lang_Get('plugin.ldap.ldap_register_ad_error');
                 return $aResult;
             }
-	        PluginFirephp::GetLog($oUser);
-            $this->User_Add($oUser);
+	        $this->User_Add($oUser);
         }
 
 
@@ -274,9 +273,18 @@ class PluginLdap_ModuleLdap extends Module {
             $this->PluginLdap_Ldap_AddAdUser($oUser->getId());
         }
 
-        $aResult['code']=1;
+        $aResult['status']=1;
         $aResult['data']=$oUser;
 	    return $aResult;
+    }
+
+    public function DelaySyncUser($sUserLogin){
+
+        return $this->oMapper->DelaySyncUser($sUserLogin);
+    }
+
+    public function GetNextSyncUser($sUserLogin){
+        return $this->oMapper->GetNextSyncUser($sUserLogin);
     }
 
 }
