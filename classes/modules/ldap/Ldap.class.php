@@ -151,7 +151,7 @@ class PluginLdap_ModuleLdap extends Module {
         }
 
         if ($oUser->getProfileCountry()) {
-            if ($oGeoObject = PluginLdap_Ldap_GetGeoName('country', $oUser->getProfileCountry())) {
+            if ($oGeoObject = $this->PluginLdap_Ldap_GetGeoName('country', $oUser->getProfileCountry())) {
                 return $oGeoObject;
             }
         }
@@ -285,6 +285,13 @@ class PluginLdap_ModuleLdap extends Module {
 
     public function GetNextSyncUser($sUserLogin){
         return $this->oMapper->GetNextSyncUser($sUserLogin);
+    }
+
+    public function GetSyncUsers(){
+        return $this->oMapper->GetSyncUsers();
+    }
+    public function DeleteUserFromCron($sUserLogin){
+        return $this->oMapper->DeleteUserFromCron($sUserLogin);
     }
 
 }

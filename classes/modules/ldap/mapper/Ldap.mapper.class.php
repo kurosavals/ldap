@@ -17,6 +17,32 @@ class PluginLdap_ModuleLdap_MapperLdap extends Mapper {
         return false;
     }
 
+    public function  GetSyncUsers() {
+
+        $sql = "
+			SELECT user_name
+			FROM ".Config::Get('db.table.ad_cron')."
+			";
+
+        if($aRows=$this->oDb->select($sql)) {
+            return $aRows;
+        }
+        return false;
+    }
+
+    public function DeleteUserFromCron($sUserLogin) {
+        $sql = "DELETE FROM ".Config::Get('db.table.ad_cron')."
+			WHERE
+				user_name = ?
+		";
+        if ($this->oDb->query($sql,$sUserLogin))
+        {
+            return true;
+        }
+        return false;
+    }
+
+
     public function DelaySyncUser($sUserLogin) {
 
         $sql = "INSERT INTO " . Config::Get('db.table.ad_cron') . "
