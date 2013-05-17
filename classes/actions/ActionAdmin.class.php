@@ -103,7 +103,6 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
         /*
          * Пагинация пользователей
          */
-        //PluginFirephp::GetLog(count($pages));
         $aPaging = $this->Viewer_MakePaging(count($pages), $iPage, 1, Config::Get('pagination.pages.count'), Router::GetPath('admin') . "users/");
         $this->Viewer_Assign('aPaging', $aPaging);
 

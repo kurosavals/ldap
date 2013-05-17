@@ -10,7 +10,7 @@ if (!class_exists('Plugin')) {
 class PluginLdap extends Plugin {
 
     protected $aInherits = array(
-        'action' => array('ActionLogin','ActionAdmin','ActionRegistration'),
+        'action' => array('ActionLogin','ActionAdmin'),
         'entity' => array('ModuleUser_EntityUser'),
 
     );

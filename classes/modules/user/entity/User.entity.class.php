@@ -16,6 +16,8 @@ class PluginLdap_ModuleUser_EntityUser extends PluginLdap_Inherit_ModuleUser_Ent
             return $this->Lang_Get('registration_login_error_used');
         }
 
+        return true;
+
     }
 
     public function ValidateMailExists($sValue, $aParams)
@@ -32,6 +34,8 @@ class PluginLdap_ModuleUser_EntityUser extends PluginLdap_Inherit_ModuleUser_Ent
         if ($aLdapUser = $ad->user()->info($sValue, array('*'), false, true)) {
             return $this->Lang_Get('registration_mail_error_used');
         }
+
+        return true;
 
 
     }
