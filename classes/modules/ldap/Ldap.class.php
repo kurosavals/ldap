@@ -16,50 +16,50 @@ class PluginLdap_ModuleLdap extends Module {
         return $this->oMapper->delAdmin($iUserId);
     }
 
-	public function GetGeoName($sType,$sName) {
-		$sType=strtolower($sType);
-		if (!$this->Geo_IsAllowGeoType($sType)) {
-			return null;
-		}
+    public function GetGeoName($sType,$sName) {
+        $sType=strtolower($sType);
+        if (!$this->Geo_IsAllowGeoType($sType)) {
+            return null;
+        }
 
-		switch($sType) {
-			case 'country':
-				return $this->GetCountryByName($sName);
-				break;
-			case 'region':
-				return $this->GetRegionByName($sName);
-				break;
-			case 'city':
-				return $this->GetCityByName($sName);
-				break;
-			default:
-				return null;
-		}
-	}
+        switch($sType) {
+            case 'country':
+                return $this->GetCountryByName($sName);
+                break;
+            case 'region':
+                return $this->GetRegionByName($sName);
+                break;
+            case 'city':
+                return $this->GetCityByName($sName);
+                break;
+            default:
+                return null;
+        }
+    }
 
-	public function GetCountryByName($sName) {
-		$aRes=$this->Geo_GetCountries(array('name_ru'=>$sName),array(),1,1);
-		if (isset($aRes['collection'][0])) {
-			return $aRes['collection'][0];
-		}
-		return null;
-	}
+    public function GetCountryByName($sName) {
+        $aRes=$this->Geo_GetCountries(array('name_ru'=>$sName),array(),1,1);
+        if (isset($aRes['collection'][0])) {
+            return $aRes['collection'][0];
+        }
+        return null;
+    }
 
-	public function GetRegionByName($sName) {
-		$aRes=$this->Geo_GetRegions(array('name_ru'=>$sName),array(),1,1);
-		if (isset($aRes['collection'][0])) {
-			return $aRes['collection'][0];
-		}
-		return null;
-	}
+    public function GetRegionByName($sName) {
+        $aRes=$this->Geo_GetRegions(array('name_ru'=>$sName),array(),1,1);
+        if (isset($aRes['collection'][0])) {
+            return $aRes['collection'][0];
+        }
+        return null;
+    }
 
-	public function GetCityByName($sName) {
-		$aRes=$this->Geo_GetCities(array('name_ru'=>$sName),array(),1,1);
-		if (isset($aRes['collection'][0])) {
-			return $aRes['collection'][0];
-		}
-		return null;
-	}
+    public function GetCityByName($sName) {
+        $aRes=$this->Geo_GetCities(array('name_ru'=>$sName),array(),1,1);
+        if (isset($aRes['collection'][0])) {
+            return $aRes['collection'][0];
+        }
+        return null;
+    }
 
     /*
      * классы, связанные с LDAP/AD
@@ -159,9 +159,9 @@ class PluginLdap_ModuleLdap extends Module {
         return null;
     }
 
-	/*
-	 * @todo рефакторинг функции. есть возможность упростить код и исправить баги!
-	 */
+    /*
+     * @todo рефакторинг функции. есть возможность упростить код и исправить баги!
+     */
     public function Synchronize($ad,$sUserLogin){
         $aLdapUser = $ad->user()->info($sUserLogin, array('*'));
         $aResult = array();
@@ -171,7 +171,7 @@ class PluginLdap_ModuleLdap extends Module {
         if (!$oUser = $this->User_GetUserByLogin($sUserLogin)) {
             $oUser = Engine::GetEntity('ModuleUser_EntityUser');
             if (!$this->PluginLdap_Ldap_updateBasicProfile($oUser, $aLdapUser)) {
-	            $aResult['status']=0;
+                $aResult['status']=0;
                 $aResult['data']=$this->Lang_Get('plugin.ldap.ldap_register_ad_error');
                 return $aResult;
             }
@@ -181,11 +181,11 @@ class PluginLdap_ModuleLdap extends Module {
             $oUser->setDateRegister(date("Y-m-d H:i:s"));
             $oUser->setActivate(1);
             if(!$oUser->getLogin() or !$oUser->getMail()){
-	            $aResult['status']=0;
+                $aResult['status']=0;
                 $aResult['data']=$this->Lang_Get('plugin.ldap.ldap_register_ad_error');
                 return $aResult;
             }
-	        $this->User_Add($oUser);
+            $this->User_Add($oUser);
         }
 
 
@@ -206,13 +206,14 @@ class PluginLdap_ModuleLdap extends Module {
 
         $aType = array('contact', 'social');
         $aFields = $this->User_getUserFields($aType);
-	    $aProf = Config::Get('plugin.ldap.profile.userfield');
-        $aUserFields = array();
-        foreach ($aProf as $key => $value) {
-            if ($aFieldId = $this->User_userFieldExistsByName($key) and isset($aFieldId)) {
-                $aUserFields[$aFieldId[0]['id']] = $value;
+        if($aProf = Config::Get('plugin.ldap.profile.userfield')){
+            $aUserFields = array();
+            foreach ($aProf as $key => $value) {
+                if ($aFieldId = $this->User_userFieldExistsByName($key) and isset($aFieldId)) {
+                    $aUserFields[$aFieldId[0]['id']] = $value;
+                }
             }
-        }
+        };
 
         /**
          * Удаляем все поля с этим типом
@@ -275,7 +276,7 @@ class PluginLdap_ModuleLdap extends Module {
 
         $aResult['status']=1;
         $aResult['data']=$oUser;
-	    return $aResult;
+        return $aResult;
     }
 
     public function DelaySyncUser($sUserLogin){
