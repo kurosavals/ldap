@@ -157,13 +157,14 @@ class PluginLdap_ActionAdmin extends PluginLdap_Inherit_ActionAdmin
             $aType = array('contact', 'social');
             $aFields = $this->User_getUserFields($aType);
 
-            $aProf = Config::Get('plugin.ldap.profile.userfield');
-            $aUserFields = array();
-            foreach ($aProf as $key => $value) {
-                if ($aFieldId = $this->User_userFieldExistsByName($key) and isset($aFieldId)) {
-                    $aUserFields[$aFieldId[0]['id']] = $value;
+            if($aProf = Config::Get('plugin.ldap.profile.userfield')){
+                $aUserFields = array();
+                foreach ($aProf as $key => $value) {
+                    if ($aFieldId = $this->User_userFieldExistsByName($key) and isset($aFieldId)) {
+                        $aUserFields[$aFieldId[0]['id']] = $value;
+                    }
                 }
-            }
+            };
 
             /**
              * Удаляем все поля с этим типом
